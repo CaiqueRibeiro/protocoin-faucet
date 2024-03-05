@@ -65,7 +65,7 @@ describe("ProtoCoin tests", function () {
     const { protoCoin, owner, otherAccount } = await loadFixture();
 
     const instance = protoCoin.connect(otherAccount);
-    await expect(instance.transfer(owner.address, 1n)).to.be.revertedWith("Insufficient balance");
+    await expect(instance.transfer(owner.address, 1n)).to.be.revertedWithCustomError(protoCoin, "ERC20InsufficientBalance");
   });
 
   it("should be able to approve", async function () {
@@ -100,11 +100,12 @@ describe("ProtoCoin tests", function () {
   });
 
   it("should not transfer from (balance)", async function () {
-    const { protoCoin, otherAccount } = await loadFixture();
+    const { protoCoin, owner, otherAccount } = await loadFixture();
 
     const instance = protoCoin.connect(otherAccount);
-    await expect(instance.transferFrom(otherAccount.address, otherAccount.address, 1n))
-      .to.be.revertedWith("Insufficient balance");
+    await instance.approve(owner.address, 1n)
+    await expect(protoCoin.transferFrom(otherAccount.address, owner.address, 1n))
+      .to.be.revertedWithCustomError(protoCoin, "ERC20InsufficientBalance");
   });
 
   it("should not transfer from (allowance)", async function () {
@@ -112,7 +113,7 @@ describe("ProtoCoin tests", function () {
 
     const instance = protoCoin.connect(otherAccount);
     await expect(instance.transferFrom(owner.address, otherAccount.address, 1n))
-      .to.be.revertedWith("Insufficient allowance");
+      .to.be.revertedWithCustomError(protoCoin, "ERC20InsufficientAllowance");
   });
 
 
@@ -122,6 +123,6 @@ describe("ProtoCoin tests", function () {
     await protoCoin.approve(otherAccount.address, 3n);
     const instance = protoCoin.connect(otherAccount);
     await expect(instance.transferFrom(owner.address, otherAccount.address, 4n))
-      .to.be.revertedWith("Insufficient allowance");
+      .to.be.revertedWithCustomError(protoCoin, "ERC20InsufficientAllowance");
   });
 });
