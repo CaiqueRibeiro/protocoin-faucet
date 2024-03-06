@@ -1,4 +1,5 @@
 import Web3 from "web3";
+import ABI from '../abi.json';
 
 export async function mint() {
     if(!window.ethereum) {
@@ -12,6 +13,10 @@ export async function mint() {
             throw new Error('No permission given!');
         }
 
-        alert(accounts[0]);
+        const contract = new web3.eth.Contract(ABI, '0x75e4187AA954a7d65E72531FA20d46fd7fd7893F', { from: accounts[0] });
+
+        const transaction = await contract.methods.mint().send();
+
+        return transaction.transactionHash;
     }
 }
